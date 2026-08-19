@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.springboot.mapper.UserMapper">
+
+    <!--  查询user表用户by username  -->
+    <select id="selectUsers"
+            resultType="com.example.springboot.entity.User">
+
+        SELECT *
+        FROM user
+
+        <where>
+            <if test="name != null and name != ''">
+                AND username LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+
+        LIMIT #{offset}, #{size}
+
+    </select>
+
+    <!--  获取counts  -->
+    <select id="countUsers" resultType="java.lang.Long">
+
+        SELECT COUNT(*)
+        FROM user
+
+        <where>
+            <if test="name != null and name != ''">
+                AND username LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+
+    </select>
+
+</mapper>
