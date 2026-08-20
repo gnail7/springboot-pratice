@@ -13,3 +13,10 @@ spring:
 
 mybatis-plus:
   mapper-locations: classpath:/mapper/*.xml
+
+# JWT 配置
+jwt:
+  # HS256 签名密钥（长度必须 >= 32 字节，生产环境请改成自己的随机值）
+  secret: gnail-admin-jwt-secret-key-please-change-me-0123456789abcdef
+  # token 有效期（毫秒），默认 24 小时
+  expiration: 86400000
