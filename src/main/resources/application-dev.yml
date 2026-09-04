@@ -5,10 +5,10 @@ spring:
   application:
     name: spring-boot-initial
   web:
-      resources:
-        static-locations:
-          - classpath:/static/
-          - classpath:/files/
+    resources:
+      static-locations:
+        - classpath:/static/
+        - classpath:/files/
 
   datasource:
     url: jdbc:mysql://localhost:3306/java_demo?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
@@ -16,18 +16,12 @@ spring:
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-# 日志
-logging:
-  file:
-    name: logs/application.log
-
 mybatis-plus:
   mapper-locations: classpath:/mapper/*.xml
-  configuration:
-    map-underscore-to-camel-case: true
+
 # JWT 配置
 jwt:
   # HS256 签名密钥（长度必须 >= 32 字节，生产环境请改成自己的随机值）
-  secret: gnail-admin-jwt-secret-key-please-change-me-0123456789abcdef
+  secret: gnail-admin-jwt-secret-key-please-change-me-0123456789abcdef-dev
   # token 有效期（毫秒），默认 24 小时
   expiration: 86400000

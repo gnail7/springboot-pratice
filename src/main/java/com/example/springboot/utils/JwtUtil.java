@@ -1,4 +1,4 @@
-package com.example.springboot.common;
+package com.example.springboot.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

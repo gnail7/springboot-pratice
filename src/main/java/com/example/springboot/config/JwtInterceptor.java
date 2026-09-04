@@ -1,10 +1,12 @@
 package com.example.springboot.config;
 
-import com.example.springboot.common.JwtUtil;
+import com.example.springboot.utils.JwtUtil;
 import com.example.springboot.exception.BusinessException;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;

@@ -1,6 +1,6 @@
 package com.example.springboot.exception;
 
-import com.example.springboot.common.Result;
+import com.example.springboot.utils.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -5,35 +5,147 @@
 
 <mapper namespace="com.example.springboot.mapper.UserMapper">
 
-    <!--  查询user表用户by username  -->
-    <select id="selectUsers"
-            resultType="com.example.springboot.entity.User">
+    <!-- 显式别名，保证任何配置下都能映射到实体字段 -->
+    <sql id="userColumns">
+        user_id       AS userId,
+        dept_id       AS deptId,
+        user_name     AS userName,
+        nick_name     AS nickName,
+        phone,
+        email,
+        sex,
+        avatar,
+        password,
+        status,
+        del_flag      AS delFlag,
+        create_time   AS createTime,
+        update_time   AS updateTime
+    </sql>
 
-        SELECT *
-        FROM user
-
+    <!-- 条件分页 -->
+    <select id="page" resultType="com.example.springboot.entity.User">
+        SELECT
+        <include refid="userColumns"/>
+        FROM sys_user
         <where>
-            <if test="name != null and name != ''">
-                AND username LIKE CONCAT('%', #{name}, '%')
+            del_flag = '0'
+            <if test="userName != null and userName != ''">
+                AND user_name LIKE CONCAT('%', #{userName}, '%')
+            </if>
+            <if test="nickName != null and nickName != ''">
+                AND nick_name LIKE CONCAT('%', #{nickName}, '%')
+            </if>
+            <if test="phone != null and phone != ''">
+                AND phone LIKE CONCAT('%', #{phone}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="sex != null and sex != ''">
+                AND sex = #{sex}
             </if>
         </where>
-
-        LIMIT #{offset}, #{size}
-
+        ORDER BY user_id DESC
+        LIMIT #{offset}, #{pageSize}
     </select>
 
-    <!--  获取counts  -->
-    <select id="countUsers" resultType="java.lang.Long">
-
+    <!-- 条件计数 -->
+    <select id="count" resultType="long">
         SELECT COUNT(*)
-        FROM user
-
+        FROM sys_user
         <where>
-            <if test="name != null and name != ''">
-                AND username LIKE CONCAT('%', #{name}, '%')
+            del_flag = '0'
+            <if test="userName != null and userName != ''">
+                AND user_name LIKE CONCAT('%', #{userName}, '%')
+            </if>
+            <if test="nickName != null and nickName != ''">
+                AND nick_name LIKE CONCAT('%', #{nickName}, '%')
+            </if>
+            <if test="phone != null and phone != ''">
+                AND phone LIKE CONCAT('%', #{phone}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="sex != null and sex != ''">
+                AND sex = #{sex}
             </if>
         </where>
-
     </select>
+
+    <!-- 按登录账号查询 -->
+    <select id="findByUsername" resultType="com.example.springboot.entity.User">
+        SELECT
+        <include refid="userColumns"/>
+        FROM sys_user
+        WHERE user_name = #{userName}
+          AND del_flag = '0'
+        LIMIT 1
+    </select>
+
+    <!-- 用户名或手机号是否已存在 -->
+    <select id="isUserExist" resultType="com.example.springboot.entity.User">
+        SELECT
+        <include refid="userColumns"/>
+        FROM sys_user
+        WHERE (user_name = #{userName} OR phone = #{phone})
+          AND del_flag = '0'
+        LIMIT 1
+    </select>
+
+    <!-- 按主键查用户 -->
+    <select id="selectByUserId" resultType="com.example.springboot.entity.User">
+        SELECT
+        <include refid="userColumns"/>
+        FROM sys_user
+        WHERE user_id = #{userId}
+          AND del_flag = '0'
+    </select>
+
+    <!-- 新增用户（返回自增主键） -->
+    <insert id="insert" parameterType="com.example.springboot.entity.User"
+            useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO sys_user (
+            dept_id, user_name, nick_name, phone, email, sex, avatar,
+            password, status, del_flag, create_time
+        )
+        VALUES (
+            #{deptId}, #{userName}, #{nickName}, #{phone}, #{email}, #{sex}, #{avatar},
+            #{password}, #{status}, '0', NOW()
+        )
+    </insert>
+
+    <!-- 修改用户基本信息（不含密码，密码走 updatePassword） -->
+    <update id="update">
+        UPDATE sys_user
+        <set>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="userName != null and userName != ''">user_name = #{userName},</if>
+            <if test="nickName != null">nick_name = #{nickName},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="sex != null">sex = #{sex},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 修改密码 -->
+    <update id="updatePassword">
+        UPDATE sys_user
+        SET password = #{password},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 逻辑删除 -->
+    <update id="deleteByUserId">
+        UPDATE sys_user
+        SET del_flag = '1',
+            update_time = NOW()
+        WHERE user_id = #{userId}
+    </update>
 
 </mapper>
