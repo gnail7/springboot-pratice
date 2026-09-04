@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  日志配置 logback-spring.xml（Spring Boot 自动加载）
+  - 控制台：彩色分级输出
+  - 文件：按天 + 单文件大小滚动，保留 30 天 / 总大小 10GB
+  - error.log：只记录 ERROR 级别，单独滚动
+  日志目录默认 ./logs，可用环境变量或 -DLOG_HOME=... 覆盖
+-->
+<configuration scan="true" scanPeriod="60 seconds">
+
+    <!-- 应用名：来自 application.yml 的 spring.application.name -->
+    <springProperty scope="context" name="appName" source="spring.application.name"
+                    defaultValue="spring-boot-initial"/>
+
+    <!-- 日志根目录：支持环境变量 LOG_HOME / -DLOG_HOME 覆盖，默认项目运行目录下 logs -->
+    <property name="LOG_HOME" value="${LOG_HOME:-./logs}"/>
+
+    <!-- 通用日志格式：时间 | 级别 | 线程 | 类 | 消息 -->
+    <property name="LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"/>
+
+    <!-- ==================== 控制台输出（带颜色） ==================== -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{50}) - %msg%n
+            </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ==================== 全量日志文件（INFO 及以上，含 ERROR） ==================== -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 当前写入文件 -->
+        <file>${LOG_HOME}/${appName}.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 按天归档；%i 用于同一天内按大小继续切分 -->
+            <fileNamePattern>${LOG_HOME}/${appName}.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <!-- 单文件超过 10MB 就切一个新文件 -->
+            <maxFileSize>10MB</maxFileSize>
+            <!-- 最多保留 30 天 -->
+            <maxHistory>30</maxHistory>
+            <!-- 历史日志总大小上限 10GB，超出删最旧 -->
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ==================== ERROR 日志文件（只收 ERROR） ==================== -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/${appName}-error.log</file>
+
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/${appName}-error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>5GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ==================== 包级别调整示例 ====================
+    <logger name="com.example.springboot" level="DEBUG"/>
+    <logger name="org.springframework.web" level="WARN"/>
+    -->
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </root>
+
+    <!-- 不同环境可覆盖 root 级别，例如：
+    <springProfile name="dev">
+        <root level="INFO"/>
+    </springProfile>
+    <springProfile name="prod">
+        <root level="WARN"/>
+    </springProfile>
+    -->
+
+</configuration>
